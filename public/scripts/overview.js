@@ -66,8 +66,10 @@ async function loadSwatData() {
   });
 
   const ip_address_map = await d3.json("../resources/SWaT/unique_vals_ips_reversed_SWAT.json");
-  const src_addresses = await d3.json("../resources/SWaT/2017_SWAT_src_ips.json");
-  const dst_addresses = await d3.json("../resources/SWaT/2017_SWAT_dst_ips.json");
+  const src_num = await d3.json("../resources/SWaT/2017_SWAT_src_ips.json");
+  const dst_num = await d3.json("../resources/SWaT/2017_SWAT_dst_ips.json");
+  const src_addresses = src_num.map(d => ip_address_map[d]);
+  const dst_addresses = dst_num.map(d => ip_address_map[d]);
   drawScatter(dataset, ip_address_map, src_addresses, dst_addresses);
 }
 
@@ -166,10 +168,10 @@ function drawScatter(data, ip_address_map, src_addresses, dst_addresses) {
       	.attr("class", "scatter-plot")
       	.attr("transform", "translate(" + [cfg.left, cfg.top] + ")");
 
-      plot.append("rect")
-      	.attr("class", "chart-background")
-      	.attr("width", cfg.width)
-      	.attr("height", cfg.height);
+      // plot.append("g")
+      // 	.attr("class", "chart-background")
+      // 	.attr("width", cfg.width)
+      // 	.attr("height", cfg.height);
 
 			x.range([0, cfg.width]);
       y.range([cfg.height, 0]);
@@ -267,9 +269,135 @@ function drawScatter(data, ip_address_map, src_addresses, dst_addresses) {
     //     .duration(200)
     //     .style("opacity", 0);
     // }
+  var newData = data.filter(function(val, index, array){
+    return val.StartTime.getTime() === data[0]["StartTime"].getTime();
+  });
+  console.log(newData);
+  addDots(newData, plot1, config1, xScale1, y1Scale, r1Scale, x1Accessor, y1Accessor, r1Accessor);
+  addDots(newData, plot2, config2, xScale2, y2Scale, r1Scale, x2Accessor, y2Accessor, r1Accessor);
 
   return svg;
 
+}
+
+function addDots(dataset, plot, cfg, x, y, r, xAcc, yAcc, rAcc) {
+  //console.log(plot.selectAll(".drawingArea"));
+  const t = plot.transition()
+        .duration(750);
+  plot
+    .select("."+cfg.drawingName)
+    .selectAll("circle")
+    .data(dataset, d => d.StartTime.getTime() + d.SrcAddr + d.Sport + d.Dport + d.DstAddr)
+    // .join("circle")
+    //     .attr("class", function(d) {
+    //       let startTime = d.StartTime.getTime()
+    //       return cfg.dotClassName +" _"+ startTime + "_" + d.SrcAddr + "_" + d.Sport +"_" + d.Dport +"_" + d.DstAddr
+    //     })
+    //     .attr("cx", function(d, i) {
+    //       if (Math.random < 0.5) {
+    //         return x(xAcc(d)) - (Math.random() * x.step());
+    //       } else {
+    //         return x(xAcc(d)) + (Math.random() * x.step());
+    //       }
+    //     })
+    //     .attr("cy", d => y(yAcc(d)))
+    //     .attr("r", d => 0)
+    //     .call(enter => enter.transition(t)
+    //           .attr("r", d => r(rAcc(d)))
+    //          )
+    //     .on("mouseover", function(event, d) {
+    //       let startTime = d.StartTime.getTime()
+    //       let className = "_" + startTime +"_" + d.SrcAddr +"_" + d.Sport +"_" + d.Dport +"_" + d.DstAddr;
+    //       d3.selectAll("circle." + className)
+    //         .transition()
+    //         .style("stroke-width", 2.5)
+    //         .style("stroke", "black");
+    //       showLabel(event, d, div);
+    //     })
+    //     .on("mouseout", function(event, d) {
+    //       let startTime = "_" + d.StartTime.getTime()
+    //       let className = startTime +"_" + d.SrcAddr +"_" + d.Sport +"_" + d.Dport +"_" + d.DstAddr;
+    //       d3.selectAll("circle." + className)
+    //         .transition()
+    //         .style("stroke-width", 0)
+    //         .style("stroke", "none");
+    //       hideLabel(div);
+    //     })
+    .join(
+         enter => enter
+            .append("circle")
+            .attr("class", function(d) {
+              let startTime = d.StartTime.getTime()
+              return cfg.dotClassName +" _"+ startTime + "_" + d.SrcAddr + "_" + d.Sport +"_" + d.Dport +"_" + d.DstAddr
+            })
+            .attr("cx", function(d, i) {
+              return x(xAcc(d))
+              // if (Math.random < 0.5) {
+              //   return x(xAcc(d)) - (Math.random() * x.step());
+              // } else {
+              //   return x(xAcc(d)) + (Math.random() * x.step());
+              // }
+            })
+            .attr("cy", d => y(yAcc(d)))
+            .attr("r", 0)
+            .call(enter => enter.transition(d3.transition().duration(750))
+                      .attr("r", d => r(rAcc(d)))
+                      .attr("fill", cfg.fill)
+                  )
+            .on("mouseover", function(event, d) {
+              let startTime = d.StartTime.getTime();
+              let className = "_" + startTime +"_" + d.SrcAddr +"_" + d.Sport +"_" + d.Dport +"_" + d.DstAddr;
+              d3.selectAll("circle." + className)
+                .transition()
+                .style("stroke-width", 2.5)
+                .style("stroke", "black");
+              showLabel(event, d);
+            })
+            .on("mouseout", function(event, d) {
+              let startTime = "_" + d.StartTime.getTime();
+              let className = startTime +"_" + d.SrcAddr +"_" + d.Sport +"_" + d.Dport +"_" + d.DstAddr;
+              d3.selectAll("circle." + className)
+                .transition()
+                .style("stroke-width", 0)
+                .style("stroke", "none");
+              hideLabel();
+            }).selection(),
+            //.on("mousemove", moveLabel)
+       update => update
+                .attr("fill","yellow")
+                .selection(),
+       exit => exit
+          .call(exit => exit.transition(d3.transition().duration(750))
+              .attr("r", 0)
+              .attr("fill", "black")
+              .remove()
+              )
+
+         )
+
+}
+
+function showLabel(event, d) {
+  //console.log(d);
+  var coords = [event.clientX, event.clientY];
+  var top = coords[1] + 30,
+    left = coords[0] - 50;
+  const div = d3.select(".tooltip");
+  div.transition()
+    .duration(200)
+    .style("opacity", 1);
+
+  div.html("<b>Source Port: </b>" + d.Sport + "<br />"
+          + "<b>Destination Port: </b>" + d.Dport)
+    .style("top", top + "px")
+    .style("left", left + "px");
+}
+
+function hideLabel(div) {
+  d3.select(".tooltip")
+    .transition()
+    .duration(200)
+    .style("opacity", 0);
 }
 
 loadSwatData();
