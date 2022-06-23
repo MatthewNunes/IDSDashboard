@@ -80,6 +80,18 @@ function drawScatter(data, ip_address_map, src_addresses, dst_addresses) {
   const width = 1060 - margin.left - margin.right,
   height = 800 - margin.top - margin.bottom;
 
+  let div = d3.select(".main_area")
+    .append("div")
+      .attr("class", "tooltip")
+      .attr("position", "absolute")
+      .style("opacity", 0)
+      .style("border", "solid")
+      .style("border-width", "2px")
+      .style("border-radius", "5px")
+      .style("padding", "5px")
+      .style("font", "12px sans-serif")
+      .style("width", 140+"px");
+
   const svg = d3.select(".main_area")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -87,10 +99,9 @@ function drawScatter(data, ip_address_map, src_addresses, dst_addresses) {
     //.attr("viewBox", [0, 0, width, height])
     //.attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
-  const div = d3.select(".main_area")
-    .append("div")
-    	.attr("class", "tooltip")
-    	.style("opacity", 0);
+
+
+
   var x1Accessor = d => ip_address_map[d.SrcAddr];
 
   var x2Accessor = d => ip_address_map[d.DstAddr];
@@ -237,42 +248,9 @@ function drawScatter(data, ip_address_map, src_addresses, dst_addresses) {
 
     }
 
-
-    // function showLabel(d) {
-    //   var coords = [d3.event.clientX, d3.event.clientY];
-    //   var top = coords[1] + 30,
-    //       left = coords[0] - 50;
-
-    //   div.transition()
-    //     .duration(200)
-    //     .style("opacity", 1);
-
-    //   div.html("<b>" + d.name + "</b></br>" +
-    //           "Students: " + uniLookup[d.name].students + "</br>" +
-    //           "Staff: " + uniLookup[d.name].nonAcademicStaff)
-    //   	.style("top", top + "px")
-    //   	.style("left", left + "px");
-    // }
-
-    // function moveLabel() {
-    //   var coords = [d3.event.clientX, d3.event.clientY];
-
-    //   var top = coords[1] + 30,
-    //       left = coords[0] - 50;
-
-    //   div.style("top", top + "px")
-    //   	.style("left", left + "px");
-    // }
-
-    // function hideLabel(d) {
-    // 	div.transition()
-    //     .duration(200)
-    //     .style("opacity", 0);
-    // }
-  var newData = data.filter(function(val, index, array){
+  var newData = data.filter(function(val, index, array) {
     return val.StartTime.getTime() === data[0]["StartTime"].getTime();
   });
-  console.log(newData);
   addDots(newData, plot1, config1, xScale1, y1Scale, r1Scale, x1Accessor, y1Accessor, r1Accessor);
   addDots(newData, plot2, config2, xScale2, y2Scale, r1Scale, x2Accessor, y2Accessor, r1Accessor);
 
@@ -379,25 +357,27 @@ function addDots(dataset, plot, cfg, x, y, r, xAcc, yAcc, rAcc) {
 
 function showLabel(event, d) {
   //console.log(d);
-  var coords = [event.clientX, event.clientY];
+  var coords = [event.pageX, event.pageY];
   var top = coords[1] + 30,
     left = coords[0] - 50;
-  const div = d3.select(".tooltip");
-  div.transition()
-    .duration(200)
-    .style("opacity", 1);
-
+  let div = d3.select(".tooltip");
   div.html("<b>Source Port: </b>" + d.Sport + "<br />"
           + "<b>Destination Port: </b>" + d.Dport)
     .style("top", top + "px")
     .style("left", left + "px");
+
+  div.transition()
+    .duration(200)
+    .style("opacity", .9);
+
+
 }
 
 function hideLabel(div) {
-  d3.select(".tooltip")
-    .transition()
-    .duration(200)
-    .style("opacity", 0);
+  // d3.select(".tooltip")
+  //   .transition()
+  //   .duration(200)
+  //   .style("opacity", 0);
 }
 
 loadSwatData();
