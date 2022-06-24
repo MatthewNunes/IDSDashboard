@@ -80,17 +80,9 @@ function drawScatter(data, ip_address_map, src_addresses, dst_addresses) {
   const width = 1060 - margin.left - margin.right,
   height = 800 - margin.top - margin.bottom;
 
-  let div = d3.select(".main_area")
+  let div = d3.select("body")
     .append("div")
-      .attr("class", "tooltip")
-      .attr("position", "absolute")
-      .style("opacity", 0)
-      .style("border", "solid")
-      .style("border-width", "2px")
-      .style("border-radius", "5px")
-      .style("padding", "5px")
-      .style("font", "12px sans-serif")
-      .style("width", 140+"px");
+      .attr("class", "tooltip");
 
   const svg = d3.select(".main_area")
     .append("svg")
@@ -374,10 +366,10 @@ function showLabel(event, d) {
 }
 
 function hideLabel(div) {
-  // d3.select(".tooltip")
-  //   .transition()
-  //   .duration(200)
-  //   .style("opacity", 0);
+  d3.select(".tooltip")
+    .transition()
+    .duration(200)
+    .style("opacity", 0);
 }
 
 loadSwatData();

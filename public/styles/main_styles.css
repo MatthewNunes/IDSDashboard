@@ -26,3 +26,16 @@
 .registers {
   grid-area: sub2;
 }
+
+div.tooltip {
+  position: absolute;
+  opacity: 0;
+  border: solid;
+  border-width: 2px;
+  border-radius: 5px;
+  padding: 5px;
+  font: 12px sans-serif;
+  width: 140px;
+  text-align: center;
+  z-index: 1;
+}
