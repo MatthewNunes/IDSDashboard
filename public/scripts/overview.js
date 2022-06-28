@@ -71,6 +71,7 @@ async function loadSwatData() {
   const src_addresses = src_num.map(d => ip_address_map[d]);
   const dst_addresses = dst_num.map(d => ip_address_map[d]);
   drawScatter(dataset, ip_address_map, src_addresses, dst_addresses);
+  drawTable(dataset, ip_address_map);
 }
 
 
@@ -214,28 +215,6 @@ function drawScatter(data, ip_address_map, src_addresses, dst_addresses) {
       plot.append("g")
         .attr("class", cfg.drawingName);
 
-      // var gridLinesX = plot.append("g")
-      // 	.selectAll("line")
-      // 	.data(x.ticks(cfg.xTicks).slice(1, -1))
-      // 	.enter().append("line")
-      // 		.attr("class", "grid-line")
-      // 		.attr("x1", d => x(d))
-      // 		.attr("y1", d => 0)
-      // 		.attr("x2", d => x(d))
-      // 		.attr("y2", d => cfg.height);
-
-      // var gridLinesY = plot.append("g")
-      // 	.selectAll("line")
-      // 	.data(y.ticks(cfg.yTicks).slice(1, -1))
-      // 	.enter().append("line")
-      // 		.attr("class", "grid-line")
-      // 		.attr("x1", d => 0)
-      // 		.attr("y1", d => y(d))
-      // 		.attr("x2", d => cfg.width)
-      // 		.attr("y2", d => y(d));
-
-      //addDots(dataset, plot, cfg, x, y, r, xAcc, yAcc, rAcc);
-     // plot.append("g")
       return plot;
 
     }
@@ -371,5 +350,73 @@ function hideLabel(div) {
     .duration(200)
     .style("opacity", 0);
 }
+
+function drawTable(dataset, ipaddress_map) {
+  // load data
+  const table = d3.select(".network_traffic");
+
+  const numberOfRows= 60
+
+  const columns = [
+    //{label: "Start", type: "text", format: d => d["StartTime"]},
+    //{label: "Last", type:"text", format: d =>d["LastTime"]},
+    {label: "Source", type: "text", format: d => ipaddress_map[d["SrcAddr"]]},
+    {label: "Destination", type: "text", format: d => ipaddress_map[d["DstAddr"]]},
+    {label: "Protocol", type: "number", format: d => d["Proto"]},
+    {label: "S-Port", type: "number", format: d => d["Sport"]},
+    {label: "D-Port", type: "number", format: d => d["Dport"]},
+    {label: "Trans", type:"number", format: d=>d["Trans"]},
+    {label: "Run Time", type:"number", format: d=>d["RunTime"]},
+    {label: "Idle Time", type:"number", format: d=>d["IdleTime"]},
+    {label: "S-Packets", type: "number", format: d => d["SrcPkts"]},
+    {label: "D-Packets", type: "number", format: d => d["DstPkts"]},
+    {label: "S-Bytes", type: "number", format: d => d["SrcBytes"]},
+    {label: "D-Bytes", type: "number", format: d => d["DstBytes"]},
+    {label: "S-Load", type: "number", format: d => d["SrcLoad"]},
+    {label: "D-Load", type: "number", format: d => d["DstLoad"]},
+    {label: "S-Loss", type: "number", format: d => d["SrcLoss"]},
+    {label: "D-Loss", type: "number", format: d => d["DstLoss"]},
+    {label: "pLoss", type: "number", format: d => d["pLoss"]},
+    {label: "S-Rate", type: "number", format: d => d["SrcRate"]},
+    {label: "D-Rate", type: "number", format: d => d["DstRate"]},
+    {label: "Dir", type: "number", format: d => d["Dir"]},
+    {label: "TCPRtt", type: "number", format: d => d["TcpRtt"]},
+    {label: "SynAck", type: "number", format: d => d["SynAck"]},
+    {label: "AckDat", type: "number", format: d => d["AckDat"]},
+    {label: "sMeanPktSz", type: "number", format: d => d["sMeanPktSz"]},
+    {label: "dMeanPktSz", type: "number", format: d => d["dMeanPktSz"]},
+    {label: "Flags", type: "number", format: d => d["Flg-e"] + d["Flg-*"] + d["Flg-d"] + d["Flg-g"] + d["Flg-s"] + d["Flg-S"] + d["Flg-D"] + d["Flg-U"] + d["Flg-*2"]},
+    {label: "ACC", type: "number", format: d => d["ACC"]},
+    {label: "CLO", type: "number", format: d => d["CLO"]},
+    {label: "CON", type: "number", format: d => d["CON"]},
+    {label: "ECO", type: "number", format: d => d["ECO"]},
+    {label: "FIN", type: "number", format: d => d["FIN"]},
+    {label: "REQ", type: "number", format: d => d["REQ"]},
+    {label: "RST", type: "number", format: d => d["RST"]},
+    {label: "URO", type: "number", format: d => d["URO"]},
+    {label: "Classification", type: "number", format: d => d["Classification"]},
+  ]
+
+  table.append("thead").append("tr")
+    .selectAll("thead")
+    .data(columns)
+    .join("th")
+      .text(d => d.label)
+      .attr("class", d => d.type)
+
+  const body = table.append("tbody")
+
+  dataset.slice(0, numberOfRows).forEach(d => {
+    body.append("tr")
+      .selectAll("td")
+      .data(columns)
+      .join("td")
+        .text(column => column.format(d))
+        .attr("class", column => column.type)
+        .style("background", column => column.background && column.background(d))
+        .style("transform", column => column.transform && column.transform(d))
+  })
+}
+
 
 loadSwatData();

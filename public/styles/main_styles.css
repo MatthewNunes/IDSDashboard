@@ -21,10 +21,12 @@
 
 .network_traffic {
   grid-area: sub1;
+  overflow: scroll;
 }
 
 .registers {
   grid-area: sub2;
+  overflow: scroll;
 }
 
 div.tooltip {
