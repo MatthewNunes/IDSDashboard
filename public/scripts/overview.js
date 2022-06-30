@@ -71,7 +71,7 @@ async function loadSwatData() {
   const src_addresses = src_num.map(d => ip_address_map[d]);
   const dst_addresses = dst_num.map(d => ip_address_map[d]);
   drawScatter(dataset, ip_address_map, src_addresses, dst_addresses);
-  drawTable(dataset, ip_address_map);
+//  drawTable(dataset, ip_address_map);
 }
 
 
